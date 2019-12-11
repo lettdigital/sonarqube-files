@@ -11,6 +11,7 @@ services:
       - sonarqube_conf:/opt/sonarqube/conf
       - sonarqube_data:/opt/sonarqube/data
       - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_common:/opt/sonarqube/lib/common
     ulimits:
       nofile:
         soft: "262144"
@@ -30,6 +31,7 @@ volumes:
   sonarqube_conf:
   sonarqube_data:
   sonarqube_extensions:
+  sonarqube_common:
   postgresql:
   postgresql_data:
 
