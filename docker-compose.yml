@@ -2,7 +2,8 @@ version: "3"
 
 services:
   sonarqube:
-    image: sonarqube
+    image: sonarqube-branch
+    build: .
     ports:
       - "9000:9000"
     environment:
