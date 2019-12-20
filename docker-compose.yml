@@ -6,7 +6,9 @@ services:
     ports:
       - "9000:9000"
     environment:
-      - sonar.jdbc.url=jdbc:postgresql://db:5432/sonar
+      - sonar.jdbc.url=jdbc:postgresql://<SONARQUBE-RDS-URL>.rds.amazonaws.com:5432/sonar?currentSchema=public
+      - sonar.jdbc.username=sonar
+      - sonar.jdbc.password=<VERY-STRONG-PASSWORD>
     volumes:
       - sonarqube_conf:/opt/sonarqube/conf
       - sonarqube_data:/opt/sonarqube/data
@@ -18,22 +20,9 @@ services:
         hard: "262144"
     restart: unless-stopped
 
-  db:
-    image: postgres:alpine
-    environment:
-      - POSTGRES_USER=sonar
-      - POSTGRES_PASSWORD=sonar
-    volumes:
-      - postgresql:/var/lib/postgresql
-      # This needs explicit mapping due to https://github.com/docker-library/postgres/blob/4e48e3228a30763913ece952c611e5e9b95c8759/Dockerfile.template#L52
-      - postgresql_data:/var/lib/postgresql/data
-    restart: unless-stopped
-
 volumes:
   sonarqube_conf:
   sonarqube_data:
   sonarqube_extensions:
   sonarqube_common:
-  postgresql:
-  postgresql_data:
 
