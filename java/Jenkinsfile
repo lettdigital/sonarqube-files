@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage ('Build') {
             when {
-                expression { env.CHANGE_ID != null || env.BRANCH_NAME == master }
+                expression { env.CHANGE_ID != null || env.BRANCH_NAME == "master" }
             }
             steps {
                 sh 'mvn clean package'
