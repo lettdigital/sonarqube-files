@@ -1,7 +1,7 @@
 import groovy.transform.Field
 
 @Field 
-def shouldWaitForQualityGate = false
+def shouldWaitForQualityGate = true
 
 pipeline {
     agent any
@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage ('Build') {
             when {
-                expression { env.CHANGE_ID != null || env.BRANCH_NAME == master }
+                expression { env.CHANGE_ID != null || env.BRANCH_NAME == "master" }
             }
             steps {
                 sh 'mvn clean package'
@@ -24,10 +24,10 @@ pipeline {
                     withSonarQubeEnv("ec2-server") {
                         if (env.CHANGE_ID != null) {
                             sh "${scannerHome}/bin/sonar-scanner -Dsonar.branch.name=$CHANGE_BRANCH -Dsonar.branch.target=$CHANGE_TARGET"
-                            shouldWaitForQualityGate = true
                         } else if (env.BRANCH_NAME == "master") {
                             sh "${scannerHome}/bin/sonar-scanner"
-                            shouldWaitForQualityGate = true
+                        } else {
+                            shouldWaitForQualityGate = false
                         }
                     }
                 }
