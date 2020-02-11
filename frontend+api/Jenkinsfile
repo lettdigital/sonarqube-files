@@ -1,0 +1,71 @@
+import groovy.transform.Field
+
+@Field 
+def shouldWaitForQualityGate = false
+
+pipeline {
+    agent any
+    stages {
+        stage('Frontend Code Quality Analysis') {
+            steps {
+                script {
+                    def scannerHome = tool 'SonarQube Scanner Latest';
+                    dir('frontend'){
+                        withSonarQubeEnv("ec2-server") {
+                            if (env.CHANGE_ID != null) {
+                                sh "${scannerHome}/bin/sonar-scanner -Dsonar.branch.name=$CHANGE_BRANCH -Dsonar.branch.target=$CHANGE_TARGET"
+                                shouldWaitForQualityGate = true
+                            } else if (env.BRANCH_NAME == "master") {
+                                sh "${scannerHome}/bin/sonar-scanner"
+                                shouldWaitForQualityGate = true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        stage("Frontend Quality Gate") {
+            when {
+                expression { shouldWaitForQualityGate == true }
+            }
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    // Parameter indicates whether to set pipeline to UNSTABLE if Quality Gate fails
+                    // true = set pipeline to UNSTABLE, false = don't
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+        stage('API Code Quality Analysis') {
+            steps {
+                script {
+                    def scannerHome = tool 'SonarQube Scanner Latest';
+                    dir('api'){
+                        withSonarQubeEnv("ec2-server") {
+                            if (env.CHANGE_ID != null) {
+                                sh "${scannerHome}/bin/sonar-scanner -Dsonar.branch.name=$CHANGE_BRANCH -Dsonar.branch.target=$CHANGE_TARGET"
+                                shouldWaitForQualityGate = true
+                            } else if (env.BRANCH_NAME == "master") {
+                                sh "${scannerHome}/bin/sonar-scanner"
+                                shouldWaitForQualityGate = true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        stage("API Quality Gate") {
+            when {
+                expression { shouldWaitForQualityGate == true }
+            }
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    // Parameter indicates whether to set pipeline to UNSTABLE if Quality Gate fails
+                    // true = set pipeline to UNSTABLE, false = don't
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+    }
+}
+
